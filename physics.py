@@ -573,14 +573,11 @@ _unit_table['pi'] = np.pi
 _addUnit('c', '299792458.*m/s', 'speed of light')
 _addUnit('mu0', '4.e-7*pi*N/A**2', 'permeability of vacuum')
 _addUnit('eps0', '1/mu0/c**2', 'permittivity of vacuum')
-_addUnit('Grav', '6.67259e-11*m**3/kg/s**2', 'gravitational constant')
-_addUnit('hplanck', '6.6260755e-34*J*s', 'Planck constant')
+_addUnit('hplanck', '6.62606957e-34*J*s', 'Planck constant')
 _addUnit('hbar', 'hplanck/(2*pi)', 'Planck constant / 2pi')
-_addUnit('e', '1.60217733e-19*C', 'elementary charge')
-_addUnit('me', '9.1093897e-31*kg', 'electron mass')
-_addUnit('mp', '1.6726231e-27*kg', 'proton mass')
-_addUnit('Nav', '6.0221367e23/mol', 'Avogadro number')
-_addUnit('k', '1.380658e-23*J/K', 'Boltzmann constant')
+_addUnit('e0', '1.602176565e-19*C', 'elementary charge')
+_addUnit('me', '9.10938291e-31*kg', 'electron mass')
+_addUnit('kb', '1.3806488e-23*J/K', 'Boltzmann constant')
 
 # Time units
 _addUnit('min', '60*s', 'minute')
@@ -588,6 +585,7 @@ _addUnit('h', '60*min', 'hour')
 _addUnit('d', '24*h', 'day')
 _addUnit('wk', '7*d', 'week')
 _addUnit('yr', '365.25*d', 'year')
+_addUnit('fortnight', '1209600*s', '14 days')
 
 # Length units
 _addUnit('inch', '2.54*cm', 'inch')
@@ -596,10 +594,11 @@ _addUnit('yd', '3*ft', 'yard')
 _addUnit('mi', '5280.*ft', '(British) mile')
 _addUnit('nmi', '1852.*m', 'Nautical mile')
 _addUnit('Ang', '1.e-10*m', 'Angstrom')
+_addUnit('AA', '1.e-10*m', 'Angstrom')
 _addUnit('lyr', 'c*yr', 'light year')
-_addUnit('Bohr', '4*pi*eps0*hbar**2/me/e**2', 'Bohr radius')
+_addUnit('Bohr', '4*pi*eps0*hbar**2/me/e0**2', 'Bohr radius')
 _addUnit('furlong', '201.168*m', 'furlongs')
-_addUnit('fortnight', '1209600*s', '14 days')
+_addUnit('au', '149597870691*m', 'astronomical unit')
 
 # Area units
 _addUnit('ha', '10000*m**2', 'hectare')
@@ -621,7 +620,7 @@ _addUnit('galUS', '4*qt', 'US gallon')
 _addUnit('galUK', '4.54609*l', 'British gallon')
 
 # Mass units
-_addUnit('amu', '1.6605402e-27*kg', 'atomic mass units')
+_addUnit('amu', '1.660538921e-27*kg', 'atomic mass units')
 _addUnit('oz', '28.349523125*g', 'ounce')
 _addUnit('lb', '16*oz', 'pound')
 _addUnit('ton', '2000*lb', 'ton')
@@ -631,9 +630,9 @@ _addUnit('dyn', '1.e-5*N', 'dyne (cgs unit)')
 
 # Energy units
 _addUnit('erg', '1.e-7*J', 'erg (cgs unit)')
-_addUnit('eV', 'e*V', 'electron volt')
-_addUnit('Hartree', 'me*e**4/16/pi**2/eps0**2/hbar**2', 'Wavenumbers/inverse cm')
-_addUnit('Ken', 'k*K', 'Kelvin as energy unit')
+_addUnit('eV', 'e0*V', 'electron volt')
+_addUnit('Hartree', 'me*e0**4/16/pi**2/eps0**2/hbar**2', 'Wavenumbers/inverse cm')
+_addUnit('Ken', 'kb*K', 'Kelvin as energy unit')
 _addUnit('cal', '4.184*J', 'thermochemical calorie')
 _addUnit('kcal', '1000*cal', 'thermochemical kilocalorie')
 _addUnit('cali', '4.1868*J', 'international calorie')
@@ -657,6 +656,7 @@ _addUnit('psi', '6894.75729317*Pa', 'pounds per square inch')
 
 # Angle units
 _addUnit('deg', 'pi*rad/180', 'degrees')
+_unit_table['cycles'] = 2*np.pi
 
 # Temperature units -- can't use the 'eval' trick that _addUnit provides
 # for degC and degF because you can't add units
@@ -675,16 +675,21 @@ _constants = [
     ('c0', Q('299792458. m/s')),
     ('mu0', Q('4.e-7 pi*N/A**2').base),
     ('eps0', Q('1 1/mu0/c**2').base),
-    ('Grav', Q('6.67259e-11 m**3/kg/s**2')),
+    ('Grav', Q('6.67384e-11 m**3/kg/s**2')),
     ('hpl', Q('6.62606957e-34 J*s')),
     ('hbar', Q('6.62606957e-34 J*s')/(2*pi)),
-    ('e0', Q('1.60217733e-19 C')),
-    ('me', Q('9.1093897e-31 kg')),
-    ('mp', Q('1.6726231e-27 kg')),
-    ('mn', Q('1.6749274e-27 kg')),
-    ('NA', Q('6.0221367e23 1/mol')),
-    ('kb', Q('1.380658e-23 J/K')),
+    ('e0', Q('1.602176565e-19 C')),
+    ('me', Q('9.10938291e-31 kg')),
+    ('mp', Q('1.672621777e-27 kg')),
+    ('mn', Q('1.674927351e-27 kg')),
+    ('NA', Q('6.02214129e23 1/mol')),
+    ('kb', Q('1.3806488e-23 J/K')),
     ('gam', Q('183.25 MHz/T')),
+    ('g0', Q('9.80665 m/s**2')),
+    ('R', Q('8.3144621 J/mol/K')),
+    ('alpha', 7.2973525698e-3),
+    ('Ry', Q('10973731.568539 1/m')),
+    ('mu_n', Q('-0.96623647e-26 J/T')),
 ]
 
 name = r'([_a-zA-Z]\w*)'
@@ -704,11 +709,15 @@ def replace_inline(match):
 def replace_slash(match):
     expr = match.group(1)
     unit = str(match.group(2))  # PhysicalQuantity doesn't like Unicode strings
+    if unit == 'base':
+        call = '.base'
+    else:
+        call = '.to(%r)' % unit
     if quantity_re.match(expr):
-        return 'Q(\'' + expr + '\').to(%r)' % unit
+        return 'Q(\'' + expr + '\')' + call
     elif not expr:
         expr = '_'
-    return '(' + expr + ').to(%r)' % unit
+    return '(' + expr + ')' + call
 def replace_conv(match):
     return 'Q(\'' + match.group(1) + '\').to(%r)' % str(match.group(4))
 def replace_assign(match):
