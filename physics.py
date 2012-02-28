@@ -312,7 +312,7 @@ class PhysicalQuantity(object):
             self.unit = _findUnit(s[match.end(0):])
 
     def __str__(self):
-        return '%.*g %s' % (self.global_precision[0], self.value,
+        return '%.*g %s' % (self.global_precision, self.value,
                             self.unit.name().replace('**', '^'))
 
     def __repr__(self):
