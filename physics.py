@@ -693,7 +693,7 @@ _constants = [
 ]
 
 name = r'([_a-zA-Z]\w*)'
-number = r'(-?[\d0-9.eE]+)'
+number = r'(-?[\d0-9.eE-]+)'
 unit = r'([a-zA-Z1][a-zA-Z0-9/*^-]*)'
 quantity = number + r'\s+' + unit
 
