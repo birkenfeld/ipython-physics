@@ -705,7 +705,8 @@ quantity_re = re.compile(quantity)
 subst_re = re.compile(r'\?' + name)
 
 def replace_inline(match):
-    return 'Q(\'' + match.group(1) + '\')'
+    return 'Quantity(\'' + match.group(1) + '\')'
+
 def replace_slash(match):
     expr = match.group(1)
     unit = str(match.group(2))  # PhysicalQuantity doesn't like Unicode strings
@@ -714,14 +715,16 @@ def replace_slash(match):
     else:
         call = '.to(%r)' % unit
     if quantity_re.match(expr):
-        return 'Q(\'' + expr + '\')' + call
+        return 'Quantity(\'' + expr + '\')' + call
     elif not expr:
         expr = '_'
     return '(' + expr + ')' + call
+
 def replace_conv(match):
-    return 'Q(\'' + match.group(1) + '\').to(%r)' % str(match.group(4))
+    return 'Quantity(\'' + match.group(1) + '\').to(%r)' % str(match.group(4))
+
 def replace_assign(match):
-    return '%s = Q(\'%s\')' % (match.group(1), match.group(2))
+    return '%s = Quantity(\'%s\')' % (match.group(1), match.group(2))
 
 
 class QTransformer(object):
@@ -773,6 +776,7 @@ q_transformer = QTransformer()
 def load_ipython_extension(ip):
     # set up simplified quantity input
     ip.user_ns['Q'] = Q
+    ip.user_ns['Quantity'] = Q
     ip.prefilter_manager.register_transformer(q_transformer)
     # setter for custom precision
     ip.user_ns['setprec'] = \
