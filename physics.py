@@ -699,6 +699,7 @@ quantity = number + r'\s+' + unit
 
 inline_unit_re = re.compile(r'\((%s)\)' % quantity)
 slash_conv_re = re.compile(r'^(.*?)//\s*%s$' % unit)
+slash_last_re = re.compile(r'^()\(/, %s\)$' % unit)
 trailing_conv_re = re.compile(r'\s*//\s*%s$' % unit)
 nice_assign_re = re.compile(r'^%s\s*=\s*(%s)$' % (name, quantity))
 quantity_re = re.compile(quantity)
@@ -746,6 +747,9 @@ class QTransformer(object):
         if not continue_prompt:
             line = slash_conv_re.sub(replace_slash, line)
             line = nice_assign_re.sub(replace_assign, line)
+            # lines that look like ``(/, unit)`` have been ``// unit`` but
+            # already preprocessed by IPython, let's recognize them
+            line = slash_last_re.sub(replace_slash, line)
         return line
 
 
