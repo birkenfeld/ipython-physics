@@ -568,11 +568,11 @@ del _unit_table['kg']
 for unit in _unit_table.keys():
     _addPrefixed(unit)
 
-# Fundamental constants
+# Fundamental constants, as far as needed to define other units
 _unit_table['pi'] = np.pi
-_addUnit('c', '299792458.*m/s', 'speed of light')
+_addUnit('c0', '299792458.*m/s', 'speed of light')
 _addUnit('mu0', '4.e-7*pi*N/A**2', 'permeability of vacuum')
-_addUnit('eps0', '1/mu0/c**2', 'permittivity of vacuum')
+_addUnit('eps0', '1/mu0/c0**2', 'permittivity of vacuum')
 _addUnit('hplanck', '6.62606957e-34*J*s', 'Planck constant')
 _addUnit('hbar', 'hplanck/(2*pi)', 'Planck constant / 2pi')
 _addUnit('e0', '1.602176565e-19*C', 'elementary charge')
@@ -595,7 +595,7 @@ _addUnit('mi', '5280.*ft', '(British) mile')
 _addUnit('nmi', '1852.*m', 'Nautical mile')
 _addUnit('Ang', '1.e-10*m', 'Angstrom')
 _addUnit('AA', '1.e-10*m', 'Angstrom')
-_addUnit('lyr', 'c*yr', 'light year')
+_addUnit('lyr', 'c0*yr', 'light year')
 _addUnit('Bohr', '4*pi*eps0*hbar**2/me/e0**2', 'Bohr radius')
 _addUnit('furlong', '201.168*m', 'furlongs')
 _addUnit('au', '149597870691*m', 'astronomical unit')
@@ -668,13 +668,13 @@ _addUnit('degF', PhysicalUnit (None, 5./9., kelvin.powers, 459.67),
          'degree Fahrenheit')
 del kelvin
 
-
+# Important physical constants
 _constants = [
     ('pi', np.pi),
     ('e', np.e),
     ('c0', Q('299792458. m/s')),
     ('mu0', Q('4.e-7 pi*N/A**2').base),
-    ('eps0', Q('1 1/mu0/c**2').base),
+    ('eps0', Q('1 1/mu0/c0**2').base),
     ('Grav', Q('6.67384e-11 m**3/kg/s**2')),
     ('hpl', Q('6.62606957e-34 J*s')),
     ('hbar', Q('6.62606957e-34 J*s')/(2*pi)),
@@ -684,12 +684,12 @@ _constants = [
     ('mn', Q('1.674927351e-27 kg')),
     ('NA', Q('6.02214129e23 1/mol')),
     ('kb', Q('1.3806488e-23 J/K')),
-    ('gam', Q('183.25 MHz/T')),
     ('g0', Q('9.80665 m/s**2')),
     ('R', Q('8.3144621 J/mol/K')),
     ('alpha', 7.2973525698e-3),
     ('Ry', Q('10973731.568539 1/m')),
     ('mu_n', Q('-0.96623647e-26 J/T')),
+    ('gamma', Q('183.247179 MHz/T')),
 ]
 
 name = r'([_a-zA-Z]\w*)'
@@ -705,9 +705,15 @@ quantity_re = re.compile(quantity)
 subst_re = re.compile(r'\?' + name)
 
 def replace_inline(match):
+    """Replace an inline unit expression, e.g. ``(1 m)``, by valid Python code
+    using a Quantity call.
+    """
     return 'Quantity(\'' + match.group(1) + '\')'
 
 def replace_slash(match):
+    """Replace a double-slash unit conversion, e.g. ``c // km/s``, by valid
+    Python code using a Quantity call.
+    """
     expr = match.group(1)
     unit = str(match.group(2))  # PhysicalQuantity doesn't like Unicode strings
     if unit == 'base':
@@ -720,14 +726,17 @@ def replace_slash(match):
         expr = '_'
     return '(' + expr + ')' + call
 
-def replace_conv(match):
-    return 'Quantity(\'' + match.group(1) + '\').to(%r)' % str(match.group(4))
-
 def replace_assign(match):
+    """Replace a pretty assignment, e.g. ``B = 1 T``, by valid Python code using
+    a Quantity call.
+    """
     return '%s = Quantity(\'%s\')' % (match.group(1), match.group(2))
 
 
 class QTransformer(object):
+    """IPython command line transformer that recognizes and replaces unit
+    expressions.
+    """
     # XXX: inheriting from PrefilterTransformer as documented gives TypeErrors,
     # but apparently is not needed after all
     priority = 99
