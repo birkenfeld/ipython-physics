@@ -1,9 +1,8 @@
 ipython-physics
 ---------------
 
-This is an extension for IPython 0.11 that at the moment mainly enables easy
-input of physical quantities (i.e. numbers with units).  It requires the
-"ScientificPython" (not SciPy) package by Konrad Hinsen.
+This is an extension for IPython 0.11+ that at the moment mainly enables easy
+input of physical quantities (i.e. numbers with units).
 
 Quick usage examples:
 
@@ -13,7 +12,7 @@ Quick usage examples:
   In:  (1 m)/(1 s)                      # sugar for inline quantity input
   Out: 1 m/s                            # in arbitrary expressions
 
-  In:  Q('1 m')/Q('1 s')                # this is the desugared form
+  In:  Quantity('1 m')/Qantity('1 s')   # this is the desugared form
   Out: 1 m/s
 
   In:  // furlong/fortnight             # convert units in last result
@@ -39,8 +38,10 @@ Quick usage examples:
   In:  c0
   Out: 2.998e+08 m/s
 
-The predefined physical constants are:
+The predefined constants are:
 
+  pi
+  e
   c0    -- vacuum speed of light
   mu0   -- magnetic constant
   eps0  -- electric constant
@@ -53,5 +54,11 @@ The predefined physical constants are:
   mn    -- neutron mass
   NA    -- Avogadro's number
   kb    -- Boltzmann constant
+  g0    -- Standard earth gravity
+  R     -- Universal gas constant
+  alpha -- fine structure constant
+  Ry    -- Rydberg constant
+  mu_n  -- Magnetic moment of the neutron
+  gamma -- Gyromagnetic ratio of the neutron
 
 Please let me know if anything is missing.
