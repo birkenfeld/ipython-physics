@@ -154,7 +154,7 @@ class PhysicalUnit(object):
 
     def __mul__(self, other):
         if self.offset != 0 or (isPhysicalUnit(other) and other.offset != 0):
-            raise UnitError("Cannot multiply units with non-zero offset")
+            raise UnitError('Cannot multiply units with non-zero offset')
         if isPhysicalUnit(other):
             return PhysicalUnit(self.names + other.names,
                                 self.factor * other.factor,
@@ -168,7 +168,7 @@ class PhysicalUnit(object):
 
     def __div__(self, other):
         if self.offset != 0 or (isPhysicalUnit(other) and other.offset != 0):
-            raise UnitError("Cannot divide units with non-zero offset")
+            raise UnitError('Cannot divide units with non-zero offset')
         if isPhysicalUnit(other):
             return PhysicalUnit(self.names - other.names,
                                 self.factor / other.factor,
@@ -179,7 +179,7 @@ class PhysicalUnit(object):
 
     def __rdiv__(self, other):
         if self.offset != 0 or (isPhysicalUnit(other) and other.offset != 0):
-            raise UnitError("Cannot divide units with non-zero offset")
+            raise UnitError('Cannot divide units with non-zero offset')
         if isPhysicalUnit(other):
             return PhysicalUnit(other.names - self.names,
                                 other.factor/self.factor,
@@ -191,7 +191,7 @@ class PhysicalUnit(object):
 
     def __pow__(self, other):
         if self.offset != 0:
-            raise UnitError("Cannot exponentiate units with non-zero offset")
+            raise UnitError('Cannot exponentiate units with non-zero offset')
         if isinstance(other, int):
             return PhysicalUnit(other*self.names, pow(self.factor, other),
                                 map(lambda x,p=other: x*p, self.powers))
