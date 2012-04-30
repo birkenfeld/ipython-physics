@@ -257,7 +257,7 @@ class PhysicalUnit(object):
 
 def _findUnit(unit):
     if isinstance(unit, basestring):
-        name = unit.strip().replace('^', '**').replace('°', 'deg')
+        name = unit.strip().replace('^', '**').replace('µ', 'mu').replace('°', 'deg')
         try:
             unit = eval(name, _unit_table)
         except NameError:
@@ -718,7 +718,7 @@ _constants = [
 
 name = r'([_a-zA-Z]\w*)'
 number = r'(-?[\d0-9.eE-]+)'
-unit = r'([a-zA-Z1°][a-zA-Z0-9/*^-]*)'
+unit = r'([a-zA-Z1°µ][a-zA-Z0-9°µ/*^-]*)'
 quantity = number + r'\s+' + unit
 
 inline_unit_re = re.compile(r'\((%s)\)' % quantity)
