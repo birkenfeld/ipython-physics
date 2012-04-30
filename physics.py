@@ -709,7 +709,7 @@ def replace_inline(match):
     """Replace an inline unit expression, e.g. ``(1 m)``, by valid Python code
     using a Quantity call.
     """
-    return '(Quantity(u\'' + match.group(1) + '\'))'
+    return '(Quantity(\'' + match.group(1) + '\'))'
 
 def replace_slash(match):
     """Replace a double-slash unit conversion, e.g. ``c // km/s``, by valid
