@@ -257,7 +257,7 @@ class PhysicalUnit(object):
 
 def _findUnit(unit):
     if isinstance(unit, basestring):
-        name = unit.strip().replace('^', '**')
+        name = unit.strip().replace('^', '**').replace('°', 'deg')
         try:
             unit = eval(name, _unit_table)
         except NameError:
@@ -694,7 +694,7 @@ _constants = [
 
 name = r'([_a-zA-Z]\w*)'
 number = r'(-?[\d0-9.eE-]+)'
-unit = r'([a-zA-Z1][a-zA-Z0-9/*^-]*)'
+unit = r'([a-zA-Z1°][a-zA-Z0-9/*^-]*)'
 quantity = number + r'\s+' + unit
 
 inline_unit_re = re.compile(r'\((%s)\)' % quantity)
@@ -709,7 +709,7 @@ def replace_inline(match):
     """Replace an inline unit expression, e.g. ``(1 m)``, by valid Python code
     using a Quantity call.
     """
-    return 'Quantity(\'' + match.group(1) + '\')'
+    return '(Quantity(u\'' + match.group(1) + '\'))'
 
 def replace_slash(match):
     """Replace a double-slash unit conversion, e.g. ``c // km/s``, by valid
