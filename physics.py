@@ -440,6 +440,12 @@ class PhysicalQuantity(object):
                 unit = units[i]
             return tuple(result)
 
+    @staticmethod
+    def any_to(qty, unit):
+        if not isPhysicalQuantity(qty):
+            qty = PhysicalQuantity(qty, 'rad')
+        return qty.to(unit)
+
     @property
     def base(self):
         """Returns the same quantity converted to base units."""
@@ -656,6 +662,8 @@ _addUnit('psi', '6894.75729317*Pa', 'pounds per square inch')
 
 # Angle units
 _addUnit('deg', 'pi*rad/180', 'degrees')
+_addUnit('arcmin', 'pi*rad/180/60', 'minutes of arc')
+_addUnit('arcsec', 'pi*rad/180/3600', 'seconds of arc')
 _unit_table['cycles'] = 2*np.pi
 
 # Temperature units -- can't use the 'eval' trick that _addUnit provides
@@ -717,15 +725,16 @@ def replace_slash(match):
     """
     expr = match.group(1)
     unit = str(match.group(2))  # PhysicalQuantity doesn't like Unicode strings
-    if unit == 'base':
-        call = '.base'
-    else:
-        call = '.to(%r)' % unit
     if quantity_re.match(expr):
-        return 'Quantity(\'' + expr + '\')' + call
+        expr = 'Quantity(\'' + expr + '\')'
     elif not expr:
         expr = '_'
-    return '(' + expr + ')' + call
+    else:
+        expr = '(' + expr + ')'
+    if unit == 'base':
+        return '(' + expr + ').base'
+    else:
+        return 'Quantity.any_to(%s, %r)' % (expr, unit)
 
 def replace_assign(match):
     """Replace a pretty assignment, e.g. ``B = 1 T``, by valid Python code using
@@ -779,7 +788,7 @@ def tbl_magic(shell, arg):
                 val = '(' + val + ')'
             expr = expr.replace('?' + subst, val)
         if unit:
-            expr = '(' + expr + ').to("' + unit + '")'
+            expr = 'Quantity.any_to((' + expr + '), %r)' % unit
         shell.run_cell(expr, False)
 
 
