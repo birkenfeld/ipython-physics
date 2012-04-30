@@ -568,6 +568,7 @@ _addUnit('lx', 'lm/m**2', 'Lux')
 _addUnit('Bq', '1/s', 'Becquerel')
 _addUnit('Gy', 'J/kg', 'Gray')
 _addUnit('Sv', 'J/kg', 'Sievert')
+_addUnit('kat', 'mol/s', 'Katal')
 
 del _unit_table['kg']
 
@@ -616,6 +617,7 @@ _addUnit('l', 'dm**3', 'liter')
 _addUnit('dl', '0.1*l', 'deci liter')
 _addUnit('cl', '0.01*l', 'centi liter')
 _addUnit('ml', '0.001*l', 'milli liter')
+_addUnit('mul', '0.000001*l', 'micro liter')
 _addUnit('tsp', '4.92892159375*ml', 'teaspoon')
 _addUnit('tbsp', '3*tsp', 'tablespoon')
 _addUnit('floz', '2*tbsp', 'fluid ounce')
@@ -626,10 +628,12 @@ _addUnit('galUS', '4*qt', 'US gallon')
 _addUnit('galUK', '4.54609*l', 'British gallon')
 
 # Mass units
+_addUnit('t', '1000*kg', 'Metric ton')
 _addUnit('amu', '1.660538921e-27*kg', 'atomic mass units')
+_addUnit('Da', '1*amu', 'Dalton')
 _addUnit('oz', '28.349523125*g', 'ounce')
 _addUnit('lb', '16*oz', 'pound')
-_addUnit('ton', '2000*lb', 'ton')
+_addUnit('ton', '2000*lb', 'US ton')
 
 # Force units
 _addUnit('dyn', '1.e-5*N', 'dyne (cgs unit)')
@@ -651,11 +655,16 @@ _addPrefixed('eV')
 _addUnit('G', '1e-4*T', 'Gauss')
 _addUnit('Oe', '79.5774715*A/m', 'Oersted')
 
+_addPrefixed('G')
+_addPrefixed('Oe')
+
 # Power units
 _addUnit('hp', '745.7*W', 'horsepower')
 
 # Pressure units
 _addUnit('bar', '1.e5*Pa', 'bar (cgs unit)')
+_addUnit('mbar', '1.e2*Pa', 'millibar')
+_addUnit('kbar', '1.e8*Pa', 'kilobar')
 _addUnit('atm', '101325.*Pa', 'standard atmosphere')
 _addUnit('torr', 'atm/760', 'torr = mm of mercury')
 _addUnit('psi', '6894.75729317*Pa', 'pounds per square inch')
@@ -670,11 +679,18 @@ _unit_table['cycles'] = 2*np.pi
 # for degC and degF because you can't add units
 kelvin = _findUnit('K')
 _addUnit('degR', '(5./9.)*K', 'degrees Rankine')
-_addUnit('degC', PhysicalUnit (None, 1.0, kelvin.powers, 273.15),
+_addUnit('degC', PhysicalUnit(None, 1.0, kelvin.powers, 273.15),
          'degrees Celcius')
-_addUnit('degF', PhysicalUnit (None, 5./9., kelvin.powers, 459.67),
+_addUnit('degF', PhysicalUnit(None, 5./9., kelvin.powers, 459.67),
          'degree Fahrenheit')
 del kelvin
+
+# Radiation-related units
+_addUnit('Ci', '3.7e10*Bq', 'Curie')
+_addUnit('rem', '0.01*Sv', 'Rem')
+
+_addPrefixed('Ci')
+_addPrefixed('rem')
 
 # Important physical constants
 _constants = [
