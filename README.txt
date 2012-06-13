@@ -60,5 +60,6 @@ The predefined constants are:
   Ry    -- Rydberg constant
   mu_n  -- Magnetic moment of the neutron
   gamma -- Gyromagnetic ratio of the neutron
+  h0    -- dimensionless Hubble parameter
 
 Please let me know if anything is missing.
