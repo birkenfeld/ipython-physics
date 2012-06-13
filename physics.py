@@ -692,6 +692,12 @@ _addUnit('rem', '0.01*Sv', 'Rem')
 _addPrefixed('Ci')
 _addPrefixed('rem')
 
+# Astronomical units
+_addUnit('Msol', '1.98892e30*kg', 'solar mass')
+_addUnit('Lsol', '3.839*W', 'solar luminosity')
+_addUnit('pc', '3.08568025e16*m')
+_addPrefixed('pc')
+
 # Important physical constants
 _constants = [
     ('pi', np.pi),
@@ -714,6 +720,7 @@ _constants = [
     ('Ry', Q('10973731.568539 1/m')),
     ('mu_n', Q('-0.96623647e-26 J/T')),
     ('gamma', Q('183.247179 MHz/T')),
+    ('h0', 0.7),
 ]
 
 name = r'([_a-zA-Z]\w*)'
