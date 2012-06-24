@@ -592,6 +592,7 @@ _addUnit('h', '60*min', 'hour')
 _addUnit('d', '24*h', 'day')
 _addUnit('wk', '7*d', 'week')
 _addUnit('yr', '365.25*d', 'year')
+_addPrefixed('yr')
 _addUnit('fortnight', '1209600*s', '14 days')
 
 # Length units
@@ -694,7 +695,7 @@ _addPrefixed('rem')
 
 # Astronomical units
 _addUnit('Msol', '1.98892e30*kg', 'solar mass')
-_addUnit('Lsol', '3.839*W', 'solar luminosity')
+_addUnit('Lsol', '3.839e26*W', 'solar luminosity')
 _addUnit('pc', '3.08568025e16*m')
 _addPrefixed('pc')
 
@@ -721,6 +722,7 @@ _constants = [
     ('mu_n', Q('-0.96623647e-26 J/T')),
     ('gamma', Q('183.247179 MHz/T')),
     ('h0', 0.7),
+    ('sigmaT', Q('6.6524e-29 m**2')),  # Thomson cross section
 ]
 
 name = r'([_a-zA-Z]\w*)'
