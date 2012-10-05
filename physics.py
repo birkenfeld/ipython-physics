@@ -453,7 +453,7 @@ class PhysicalQuantity(object):
         num = ''
         denom = ''
         for i in xrange(9):
-            unit = _base_names[i]
+            unit = _base_names[i]            
             power = self.unit.powers[i]
             if power < 0:
                 denom += '/' + unit
@@ -467,6 +467,36 @@ class PhysicalQuantity(object):
             num = '1'
         else:
             num = num[1:]
+        return self.__class__(new_value, num + denom)
+
+    @property
+    def cgs(self):
+        """Returns the same quantity converted to cgs units."""
+        new_value = self.value * self.unit.factor
+        num = ''
+        denom = ''
+        for i in xrange(9):
+
+            unit_name = _base_names[i]
+            cgs_name = _cgs_names[i]
+            power = self.unit.powers[i]
+
+            conversion_factor = Q('1 '+unit_name).to(cgs_name).value
+            new_value *= conversion_factor**power
+
+            if power < 0:
+                denom += '/' + cgs_name
+                if power < -1:
+                    denom += '**' + str(-power)
+            elif power > 0:
+                num += '*' + cgs_name
+                if power > 1:
+                    num += '**' + str(power)
+        if len(num) == 0:
+            num = '1'
+        else:
+            num = num[1:]
+
         return self.__class__(new_value, num + denom)
 
     # implementations of special functions, used by numpy ufuncs
@@ -514,6 +544,9 @@ _base_units = [
     ('rad', PhysicalUnit('rad', 1.,    [0,0,0,0,0,0,0,1,0])),
     ('sr',  PhysicalUnit('sr',  1.,    [0,0,0,0,0,0,0,0,1])),
 ]
+
+_cgs_names = ['cm', 'g', 's', 'abA', 'K', 'mol', 'cd', 'rad', 'sr']
+
 
 _prefixes = [
     ('Y',  1.e24), ('Z',  1.e21), ('E',  1.e18), ('P',  1.e15), ('T',  1.e12),
@@ -569,6 +602,8 @@ _addUnit('Bq', '1/s', 'Becquerel')
 _addUnit('Gy', 'J/kg', 'Gray')
 _addUnit('Sv', 'J/kg', 'Sievert')
 _addUnit('kat', 'mol/s', 'Katal')
+
+_addUnit('abA', '10*A', 'Abampere')
 
 del _unit_table['kg']
 
@@ -756,6 +791,8 @@ def replace_slash(match):
         expr = '(' + expr + ')'
     if unit == 'base':
         return '(' + expr + ').base'
+    if unit == 'cgs':
+        return '(' + expr + ').cgs'
     else:
         return 'Quantity.any_to(%s, %r)' % (expr, unit)
 
