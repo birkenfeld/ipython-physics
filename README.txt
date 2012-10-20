@@ -4,6 +4,13 @@ ipython-physics
 This is an extension for IPython 0.11+ that at the moment mainly enables easy
 input of physical quantities (i.e. numbers with units).
 
+Quick installation advice:
+
+  Place `physics.py` in any directory on PYTHONPATH, or add its directory to
+  `sys.path` in your IPython `ipython_config.py` file.  Then you can load it
+  either in the config file or on the command line as described here:
+  http://ipython.org/ipython-doc/dev/config/extensions/index.html
+
 Quick usage examples:
 
   In:  1 m // cm                        # convert between units
