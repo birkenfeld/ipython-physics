@@ -4,6 +4,10 @@ ipython-physics
 This is an extension for IPython 0.11+ that at the moment mainly enables easy
 input of physical quantities (i.e. numbers with units).
 
+If the "uncertainties" module (http://github.com/newville/uncertainties/) is
+installed, you can also enter values with standard errors wherever you can enter
+quantities, see the examples below.
+
 Quick installation advice:
 
   Place `physics.py` in any directory on PYTHONPATH, or add its directory to
@@ -30,6 +34,11 @@ Quick usage examples:
 
   In:  sin(alpha)                       # angle units work with NumPy
   Out: 1.0                              # trigonometric functions
+
+  In:  m = 80 +/- 5 kg                  # calculating with uncertainties
+  In:  v = 130 +/- 10 m/s               # (needs the "uncertainties" module)
+  In:  0.5 * m * v**2 // kJ
+  Out: 676 +/- 112.25445 kJ
 
   In:  %tbl sqrt(?x**2 + ?y**2) // cm   # quickly tabulate a formula:
   x = 1 m                               # provide some values
