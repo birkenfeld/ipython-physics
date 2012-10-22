@@ -13,6 +13,20 @@ from math import pi
 
 import numpy as np
 
+# allow uncertain values if the "uncertainties" package is available
+try:
+    from uncertainties import ufloat, Variable, AffineScalarFunc
+    import uncertainties.umath as unp
+    uncertain = (Variable, AffineScalarFunc)
+    def valuetype((v, u)):
+        if isinstance(v, uncertain):
+            return v
+        return ufloat((v, u))
+except ImportError:
+    uncertain = ()
+    valuetype = lambda (v, u): v
+    unp = np
+
 
 class UnitError(ValueError):
     pass
@@ -288,9 +302,10 @@ class PhysicalQuantity(object):
 
     global_precision = 8
 
-    _number = re.compile('[+-]?[0-9]+(\\.[0-9]*)?([eE][+-]?[0-9]+)?')
+    _number = re.compile(r'([+-]?[0-9]+(?:\.[0-9]*)?(?:[eE][+-]?[0-9]+)?)'
+                         r'(?:\s+\+\/-\s+([+-]?[0-9]+(?:\.[0-9]*)?(?:[eE][+-]?[0-9]+)?))?')
 
-    def __init__(self, value, unit=None):
+    def __init__(self, value, unit=None, stdev=None):
         """There are two constructor calling patterns:
 
         1. PhysicalQuantity(value, unit), where value is any number and unit is
@@ -301,19 +316,27 @@ class PhysicalQuantity(object):
            is provided for more convenient interactive use.
         """
         if unit is not None:
-            self.value = value
+            self.value = valuetype((value, stdev or 0))
             self.unit = _findUnit(unit)
         else:
             s = value.strip()
-            match = PhysicalQuantity._number.match(s)
+            match = self._number.match(s)
             if match is None:
                 raise UnitError('No number found in %r' % value)
-            self.value = float(match.group(0))
+            self.value = valuetype((float(match.group(1)),
+                                    float(match.group(2) or 0)))
             self.unit = _findUnit(s[match.end(0):])
 
     def __str__(self):
-        return '%.*g %s' % (self.global_precision, self.value,
-                            self.unit.name().replace('**', '^'))
+        prec = self.global_precision
+        unit = self.unit.name().replace('**', '^')
+        if isinstance(self.value, uncertain):
+            stdev = self.value.std_dev()
+            if stdev:
+                return '%.*g +/- %.*g %s' % (prec, self.value.nominal_value,
+                                             prec, stdev, unit)
+            return '%.*g %s' % (prec, self.value.nominal_value, unit)
+        return '%.*g %s' % (prec, self.value, unit)
 
     def __repr__(self):
         return self.__str__()
@@ -453,7 +476,7 @@ class PhysicalQuantity(object):
         num = ''
         denom = ''
         for i in xrange(9):
-            unit = _base_names[i]            
+            unit = _base_names[i]
             power = self.unit.powers[i]
             if power < 0:
                 denom += '/' + unit
@@ -506,22 +529,22 @@ class PhysicalQuantity(object):
 
     def sin(self):
         if self.unit.is_angle:
-            return np.sin(self.value *
-                          self.unit.conversion_factor_to(_unit_table['rad']))
+            return unp.sin(self.value *
+                           self.unit.conversion_factor_to(_unit_table['rad']))
         else:
             raise UnitError('Argument of sin must be an angle')
 
     def cos(self):
         if self.unit.is_angle:
-            return np.cos(self.value *
-                          self.unit.conversion_factor_to(_unit_table['rad']))
+            return unp.cos(self.value *
+                           self.unit.conversion_factor_to(_unit_table['rad']))
         else:
             raise UnitError('Argument of cos must be an angle')
 
     def tan(self):
         if self.unit.is_angle:
-            return np.tan(self.value *
-                          self.unit.conversion_factor_to(_unit_table['rad']))
+            return unp.tan(self.value *
+                           self.unit.conversion_factor_to(_unit_table['rad']))
         else:
             raise UnitError('Argument of tan must be an angle')
 
@@ -763,7 +786,7 @@ _constants = [
 name = r'([_a-zA-Z]\w*)'
 number = r'(-?[\d0-9.eE-]+)'
 unit = r'([a-zA-Z1°µ][a-zA-Z0-9°µ/*^-]*)'
-quantity = number + r'\s+' + unit
+quantity = number + r'(?:\s+\+\/-\s+' + number + ')?' + r'\s+' + unit
 
 inline_unit_re = re.compile(r'\((%s)\)' % quantity)
 slash_conv_re = re.compile(r'^(.*?)//\s*%s$' % unit)
