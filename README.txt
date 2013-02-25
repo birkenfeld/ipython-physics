@@ -2,7 +2,8 @@ ipython-physics
 ---------------
 
 This is an extension for IPython 0.11+ that at the moment mainly enables easy
-input of physical quantities (i.e. numbers with units).
+input of physical quantities (i.e. numbers with units).  The implementation
+is adapted from Konrad Hinsen's "Scientific.Physics.PhysicalQuantities" module.
 
 If the "uncertainties" module (http://github.com/newville/uncertainties/) is
 installed, you can also enter values with standard errors wherever you can enter
