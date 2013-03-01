@@ -874,7 +874,10 @@ def tbl_magic(shell, arg):
             expr = expr.replace('?' + subst, val)
         if unit:
             expr = 'Quantity.any_to((' + expr + '), %r)' % unit
-        shell.run_cell(expr, False)
+        if hasattr(shell, 'shell'):  # later IPython versions
+            shell.shell.run_cell(expr, False)
+        else:
+            shell.run_cell(expr, False)
 
 
 q_transformer = QTransformer()
