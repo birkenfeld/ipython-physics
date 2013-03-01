@@ -9,6 +9,9 @@ If the "uncertainties" module (http://github.com/newville/uncertainties/) is
 installed, you can also enter values with standard errors wherever you can enter
 quantities, see the examples below.
 
+You can have a look at a short notebook tutorial put together by Hans Fangohr at
+http://www.southampton.ac.uk/~fangohr/blog/physical-quantities-numerical-value-with-units-in-python.html.
+
 Quick installation advice:
 
   Place `physics.py` in any directory on PYTHONPATH, or add its directory to
