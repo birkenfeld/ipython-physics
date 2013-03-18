@@ -523,6 +523,9 @@ class PhysicalQuantity(object):
         return self.__class__(new_value, num + denom)
 
     # implementations of special functions, used by numpy ufuncs
+    def __format__(self, *args, **kw):
+        formatstring = "{1:{0}} {2}".format(args[0],self.value, self.unit)
+        return formatstring
 
     def sqrt(self):
         return pow(self, 0.5)
