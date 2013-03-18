@@ -418,6 +418,9 @@ class PhysicalQuantity(object):
     def __nonzero__(self):
         return self.value != 0
 
+    def __format__(self, *args, **kw):
+        return "{1:{0}} {2}".format(args[0],self.value, self.unit)
+    
     def convert(self, unit):
         """Change the unit and adjust the value such that the combination is
         equivalent to the original one. The new unit must be compatible with the
@@ -523,9 +526,6 @@ class PhysicalQuantity(object):
         return self.__class__(new_value, num + denom)
 
     # implementations of special functions, used by numpy ufuncs
-    def __format__(self, *args, **kw):
-        formatstring = "{1:{0}} {2}".format(args[0],self.value, self.unit)
-        return formatstring
 
     def sqrt(self):
         return pow(self, 0.5)
