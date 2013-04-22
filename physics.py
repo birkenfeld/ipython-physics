@@ -142,6 +142,8 @@ class PhysicalUnit(object):
                     num = num + '**' + str(power)
         if len(num) == 0:
             num = '1'
+            if denom == '':
+                return ''
         else:
             num = num[1:]
         return num + denom
@@ -491,6 +493,8 @@ class PhysicalQuantity(object):
                     num += '**' + str(power)
         if len(num) == 0:
             num = '1'
+            if denom == '':
+                return new_value
         else:
             num = num[1:]
         return self.__class__(new_value, num + denom)
@@ -520,6 +524,8 @@ class PhysicalQuantity(object):
                     num += '**' + str(power)
         if len(num) == 0:
             num = '1'
+            if denom == '':
+                return new_value
         else:
             num = num[1:]
 
