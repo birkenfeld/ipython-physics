@@ -710,6 +710,8 @@ _addUnit('kcal', '1000*cal', 'thermochemical kilocalorie')
 _addUnit('cali', '4.1868*J', 'international calorie')
 _addUnit('kcali', '1000*cali', 'international kilocalorie')
 _addUnit('Btu', '1055.05585262*J', 'British thermal unit')
+_addUnit('tTNT', '4.184*(10**9)*J', 'ton TNT')
+_addUnit('MtTNT', '4.184*(10**15)*J', 'Mega ton TNT')
 
 _addPrefixed('eV')
 
