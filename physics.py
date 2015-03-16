@@ -858,6 +858,27 @@ class QTransformer(object):
         return line
 
 
+from IPython.core.inputtransformer import InputTransformer
+class QInputTransformer(InputTransformer):
+    def push(self, line):
+        """
+        Gets called once for every (logical) line in a cell.
+        """
+        line = inline_unit_re.sub(replace_inline, line)
+        line = slash_conv_re.sub(replace_slash, line)
+        line = nice_assign_re.sub(replace_assign, line)
+        # lines that look like ``(/, unit)`` have been ``// unit`` but
+        # already preprocessed by IPython, let's recognize them
+        line = slash_last_re.sub(replace_slash, line)
+        return line
+    
+    def reset(self):
+        """
+        There is no internal state in the transformer, we should not need to do anything here.
+        """
+        pass
+
+
 def tbl_magic(shell, arg):
     """tbl <expr>: Evaluate <expr> for a range of parameters, given
     as "?name" in the expr.
@@ -899,6 +920,11 @@ def load_ipython_extension(ip):
     ip.user_ns['Q'] = Q
     ip.user_ns['Quantity'] = Q
     ip.prefilter_manager.register_transformer(q_transformer)
+    
+    # add notebook transformers
+    ip.input_splitter.logical_line_transforms.append(QInputTransformer())
+    ip.input_transformer_manager.logical_line_transforms.append(QInputTransformer())
+    
     # setter for custom precision
     ip.user_ns['setprec'] = \
         lambda p: setattr(PhysicalQuantity, 'global_precision', p)
