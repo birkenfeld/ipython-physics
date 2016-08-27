@@ -27,7 +27,7 @@ Quick usage examples:
   In:  (1 m)/(1 s)                      # sugar for inline quantity input
   Out: 1 m/s                            # in arbitrary expressions
 
-  In:  Quantity('1 m')/Qantity('1 s')   # this is the desugared form
+  In:  Quantity('1 m')/Quantity('1 s')  # this is the desugared form
   Out: 1 m/s
 
   In:  // furlong/fortnight             # convert units in last result
