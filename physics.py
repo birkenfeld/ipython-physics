@@ -929,7 +929,10 @@ def load_ipython_extension(ip):
     ip.user_ns['setprec'] = \
         lambda p: setattr(PhysicalQuantity, 'global_precision', p)
     # quick evaluator
-    ip.define_magic('tbl', tbl_magic)
+    # TODO: this old API is no longer supported by IPython.
+    # Need to adapt it to the @register_line_magic API.
+    if hasattr(ip, 'define_magic'):
+        ip.define_magic('tbl', tbl_magic)
 
     # active true float division
     exec ip.compile('from __future__ import division', '<input>', 'single') \
