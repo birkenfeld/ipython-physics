@@ -896,7 +896,7 @@ def input_transformer(lines):
 
 class QInputTransformer(InputTransformer):
     def push(self, line):
-        return input_transformer([line])
+        return input_transformer([line])[0]
 
     def reset(self):
         pass
