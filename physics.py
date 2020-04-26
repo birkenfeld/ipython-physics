@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-IPython (0.11) extension for physical quantity input.
+IPython 5+ extension for physical quantity input.
 See README.txt for usage examples.
 
 Author: Georg Brandl <georg@python.org>.
@@ -10,26 +10,35 @@ This file has been placed in the public domain.
 import re
 import sys
 from math import pi
+from functools import reduce, total_ordering
 
 import numpy as np
+
+# note: deprecated since IPython 7
+from IPython.core.inputtransformer import InputTransformer
 
 # allow uncertain values if the "uncertainties" package is available
 try:
     from uncertainties import ufloat, Variable, AffineScalarFunc
     import uncertainties.umath as unp
     uncertain = (Variable, AffineScalarFunc)
-    def valuetype((v, u)):
+
+    def valuetype(val_unit):
+        v, u = val_unit
         if isinstance(v, uncertain):
             return v
         return ufloat((v, u))
 except ImportError:
     uncertain = ()
-    valuetype = lambda (v, u): v
     unp = np
+
+    def valuetype(val_unit):
+        return val_unit[0]
 
 
 class UnitError(ValueError):
     pass
+
 
 # Adapted from ScientificPython:
 # Written by Konrad Hinsen <hinsen@cnrs-orleans.fr>
@@ -51,37 +60,38 @@ class NumberDict(dict):
         except KeyError:
             return 0
 
-    def __coerce__(self, other):
-        if type(other) == type({}):
-            other = NumberDict(other)
-        return self, other
-
     def __add__(self, other):
         sum_dict = NumberDict()
-        for key in self.keys():
+        for key in self:
             sum_dict[key] = self[key]
-        for key in other.keys():
+        for key in other:
             sum_dict[key] = sum_dict[key] + other[key]
         return sum_dict
 
+    def __radd__(self, other):
+        return NumberDict(other) + self
+
     def __sub__(self, other):
         sum_dict = NumberDict()
-        for key in self.keys():
+        for key in self:
             sum_dict[key] = self[key]
-        for key in other.keys():
+        for key in other:
             sum_dict[key] = sum_dict[key] - other[key]
         return sum_dict
 
+    def __rsub__(self, other):
+        return NumberDict(other) - self
+
     def __mul__(self, other):
         new = NumberDict()
-        for key in self.keys():
+        for key in self:
             new[key] = other*self[key]
         return new
     __rmul__ = __mul__
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         new = NumberDict()
-        for key in self.keys():
+        for key in self:
             new[key] = self[key]/other
         return new
 
@@ -91,10 +101,12 @@ class NumberDict(dict):
 def isPhysicalUnit(x):
     return hasattr(x, 'factor') and hasattr(x, 'powers')
 
+
 def isPhysicalQuantity(x):
     return hasattr(x, 'value') and hasattr(x, 'unit')
 
 
+@total_ordering
 class PhysicalUnit(object):
     """Physical unit.
 
@@ -114,7 +126,7 @@ class PhysicalUnit(object):
         @param offset: an additive offset to the base unit (used only for
                        temperatures)
         """
-        if isinstance(names, basestring):
+        if isinstance(names, str):
             self.names = NumberDict()
             self.names[names] = 1
         else:
@@ -130,7 +142,7 @@ class PhysicalUnit(object):
     def name(self):
         num = ''
         denom = ''
-        for unit in self.names.keys():
+        for unit in self.names:
             power = self.names[unit]
             if power < 0:
                 denom = denom + '/' + unit
@@ -155,7 +167,7 @@ class PhysicalUnit(object):
     @property
     def is_angle(self):
         return self.powers[7] == 1 and \
-               reduce(lambda a, b: a + b, self.powers) == 1
+            reduce(lambda a, b: a + b, self.powers) == 1
 
     def __str__(self):
         return self.name()
@@ -163,10 +175,15 @@ class PhysicalUnit(object):
     def __repr__(self):
         return '<PhysicalUnit ' + self.name() + '>'
 
-    def __cmp__(self, other):
+    def __eq__(self, other):
         if self.powers != other.powers:
             raise UnitError('Incompatible units')
-        return cmp(self.factor, other.factor)
+        return self.factor == other.factor
+
+    def __lt__(self, other):
+        if self.powers != other.powers:
+            raise UnitError('Incompatible units')
+        return self.factor < other.factor
 
     def __mul__(self, other):
         if self.offset != 0 or (isPhysicalUnit(other) and other.offset != 0):
@@ -174,7 +191,7 @@ class PhysicalUnit(object):
         if isPhysicalUnit(other):
             return PhysicalUnit(self.names + other.names,
                                 self.factor * other.factor,
-                                map(lambda a,b: a+b, self.powers, other.powers))
+                                [a+b for (a,b) in zip(self.powers, other.powers)])
         else:
             return PhysicalUnit(self.names + {str(other): 1},
                                 self.factor * other, self.powers,
@@ -182,35 +199,35 @@ class PhysicalUnit(object):
 
     __rmul__ = __mul__
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         if self.offset != 0 or (isPhysicalUnit(other) and other.offset != 0):
             raise UnitError('Cannot divide units with non-zero offset')
         if isPhysicalUnit(other):
             return PhysicalUnit(self.names - other.names,
                                 self.factor / other.factor,
-                                map(lambda a, b: a-b, self.powers, other.powers))
+                                [a-b for (a,b) in zip(self.powers, other.powers)])
         else:
             return PhysicalUnit(self.names+{str(other): -1},
                                 self.factor/other, self.powers)
 
-    def __rdiv__(self, other):
+    def __rtruediv__(self, other):
         if self.offset != 0 or (isPhysicalUnit(other) and other.offset != 0):
             raise UnitError('Cannot divide units with non-zero offset')
         if isPhysicalUnit(other):
             return PhysicalUnit(other.names - self.names,
                                 other.factor/self.factor,
-                                map(lambda a,b: a-b, other.powers, self.powers))
+                                [a-b for (a,b) in zip(other.powers, self.powers)])
         else:
             return PhysicalUnit({str(other): 1} - self.names,
                                 other / self.factor,
-                                map(lambda x: -x, self.powers))
+                                [-x for x in self.powers])
 
     def __pow__(self, other):
         if self.offset != 0:
             raise UnitError('Cannot exponentiate units with non-zero offset')
         if isinstance(other, int):
             return PhysicalUnit(other*self.names, pow(self.factor, other),
-                                map(lambda x,p=other: x*p, self.powers))
+                                [x*other for x in self.powers])
         if isinstance(other, float):
             inv_exp = 1./other
             rounded = int(np.floor(inv_exp + 0.5))
@@ -218,7 +235,7 @@ class PhysicalUnit(object):
                 if reduce(lambda a, b: a and b,
                           map(lambda x, e=rounded: x%e == 0, self.powers)):
                     f = pow(self.factor, other)
-                    p = map(lambda x,p=rounded: x/p, self.powers)
+                    p = [x/rounded for x in self.powers]
                     if reduce(lambda a, b: a and b,
                               map(lambda x, e=rounded: x%e == 0,
                                   self.names.values())):
@@ -272,7 +289,7 @@ class PhysicalUnit(object):
 # Helper functions
 
 def _findUnit(unit):
-    if isinstance(unit, basestring):
+    if isinstance(unit, str):
         name = unit.strip().replace('^', '**').replace('µ', 'mu').replace('°', 'deg')
         try:
             unit = eval(name, _unit_table)
@@ -291,6 +308,7 @@ def _convertValue(value, src_unit, target_unit):
     return (value + offset) * factor
 
 
+@total_ordering
 class PhysicalQuantity(object):
     """Physical quantity with units.
 
@@ -361,9 +379,13 @@ class PhysicalQuantity(object):
     def __rsub__(self, other):
         return self._sum(other, -1, 1)
 
-    def __cmp__(self, other):
+    def __eq__(self, other):
         diff = self._sum(other, 1, -1)
-        return cmp(diff.value, 0)
+        return diff.value == 0
+
+    def __lt__(self, other):
+        diff = self._sum(other, 1, -1)
+        return diff.value < 0
 
     def __mul__(self, other):
         if not isPhysicalQuantity(other):
@@ -422,7 +444,7 @@ class PhysicalQuantity(object):
 
     def __format__(self, *args, **kw):
         return "{1:{0}} {2}".format(args[0],self.value, self.unit)
-    
+
     def convert(self, unit):
         """Change the unit and adjust the value such that the combination is
         equivalent to the original one. The new unit must be compatible with the
@@ -447,7 +469,7 @@ class PhysicalQuantity(object):
         all the values except for the last one are integers. This is used to
         convert to irregular unit systems like hour/minute/second.
         """
-        units = map(_findUnit, units)
+        units = [_findUnit(x) for x in units]
         if len(units) == 1:
             unit = units[0]
             value = _convertValue(self.value, self.unit, unit)
@@ -480,7 +502,7 @@ class PhysicalQuantity(object):
         new_value = self.value * self.unit.factor
         num = ''
         denom = ''
-        for i in xrange(9):
+        for i in range(9):
             unit = _base_names[i]
             power = self.unit.powers[i]
             if power < 0:
@@ -505,7 +527,7 @@ class PhysicalQuantity(object):
         new_value = self.value * self.unit.factor
         num = ''
         denom = ''
-        for i in xrange(9):
+        for i in range(9):
 
             unit_name = _base_names[i]
             cgs_name = _cgs_names[i]
@@ -594,7 +616,7 @@ for unit in _base_units:
     _unit_table[unit[0]] = unit[1]
 
 def _addUnit(name, unit, comment=''):
-    if _unit_table.has_key(name):
+    if name in _unit_table:
         raise KeyError('Unit ' + name + ' already defined')
     if type(unit) == type(''):
         unit = eval(unit, _unit_table)
@@ -639,7 +661,7 @@ _addUnit('abA', '10*A', 'Abampere')
 
 del _unit_table['kg']
 
-for unit in _unit_table.keys():
+for unit in list(_unit_table):
     _addPrefixed(unit)
 
 # Fundamental constants, as far as needed to define other units
@@ -847,6 +869,7 @@ class QTransformer(object):
     # but apparently is not needed after all
     priority = 99
     enabled = True
+
     def transform(self, line, continue_prompt):
         line = inline_unit_re.sub(replace_inline, line)
         if not continue_prompt:
@@ -858,24 +881,24 @@ class QTransformer(object):
         return line
 
 
-from IPython.core.inputtransformer import InputTransformer
-class QInputTransformer(InputTransformer):
-    def push(self, line):
-        """
-        Gets called once for every (logical) line in a cell.
-        """
+def input_transformer(lines):
+    new_lines = []
+    for line in lines:
         line = inline_unit_re.sub(replace_inline, line)
         line = slash_conv_re.sub(replace_slash, line)
         line = nice_assign_re.sub(replace_assign, line)
         # lines that look like ``(/, unit)`` have been ``// unit`` but
         # already preprocessed by IPython, let's recognize them
         line = slash_last_re.sub(replace_slash, line)
-        return line
-    
+        new_lines.append(line)
+    return new_lines
+
+
+class QInputTransformer(InputTransformer):
+    def push(self, line):
+        return input_transformer([line])
+
     def reset(self):
-        """
-        There is no internal state in the transformer, we should not need to do anything here.
-        """
         pass
 
 
@@ -895,7 +918,7 @@ def tbl_magic(shell, arg):
         expr = arg
         for subst in substs:
             try:
-                val = raw_input('%s = ' % subst)
+                val = input('%s = ' % subst)
             except EOFError:
                 sys.stdout.write('\n')
                 return
@@ -920,11 +943,17 @@ def load_ipython_extension(ip):
     ip.user_ns['Q'] = Q
     ip.user_ns['Quantity'] = Q
     ip.prefilter_manager.register_transformer(q_transformer)
-    
+
     # add notebook transformers
-    ip.input_splitter.logical_line_transforms.append(QInputTransformer())
-    ip.input_transformer_manager.logical_line_transforms.append(QInputTransformer())
-    
+    try:
+        import IPython.core.inputtransformer2
+    except ImportError:
+        ip.input_transformer_manager.logical_line_transforms.append(
+            QInputTransformer())
+    else:
+        # IPython 7
+        ip.input_transformer_manager.line_transforms.append(input_transformer)
+
     # setter for custom precision
     ip.user_ns['setprec'] = \
         lambda p: setattr(PhysicalQuantity, 'global_precision', p)
@@ -934,15 +963,12 @@ def load_ipython_extension(ip):
     if hasattr(ip, 'define_magic'):
         ip.define_magic('tbl', tbl_magic)
 
-    # active true float division
-    exec ip.compile('from __future__ import division', '<input>', 'single') \
-        in ip.user_ns
-
     # add constants of nature
     for const, value in _constants:
         ip.user_ns[const] = value
 
-    print 'Unit calculation and physics extensions activated.'
+    print('Unit calculation and physics extensions activated.')
+
 
 def unload_ipython_extension(ip):
     ip.prefilter_manager.unregister_transformer(q_transformer)

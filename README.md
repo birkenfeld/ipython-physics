@@ -21,6 +21,7 @@ Quick installation advice:
 
 Quick usage examples:
 
+```
   In:  1 m // cm                        # convert between units
   Out: 100 cm                           # (syntax inspired by Mathematica)
 
@@ -57,9 +58,11 @@ Quick usage examples:
   In:  setprec(4)                       # set the display precision
   In:  c0
   Out: 2.998e+08 m/s
+```
 
 The predefined constants are:
 
+```
   pi
   e
   c0    -- vacuum speed of light
@@ -81,5 +84,6 @@ The predefined constants are:
   mu_n  -- Magnetic moment of the neutron
   gamma -- Gyromagnetic ratio of the neutron
   h0    -- dimensionless Hubble parameter
+```
 
 Please let me know if anything is missing.
