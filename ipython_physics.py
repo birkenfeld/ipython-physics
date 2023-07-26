@@ -7,6 +7,8 @@ Author: Georg Brandl <georg@python.org>.
 This file has been placed in the public domain.
 """
 
+__version__ = "0.1.0"
+
 import re
 import sys
 from math import pi
